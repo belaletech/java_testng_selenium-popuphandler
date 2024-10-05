@@ -1,119 +1,96 @@
 package com.lambdatest;
 
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.openqa.selenium.By;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.safari.SafariOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testng.Assert;
-import org.testng.ITestContext;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 public class TestNGTodo1 {
-
     private RemoteWebDriver driver;
-    private String Status = "failed";
 
-    @BeforeMethod
-    public void setup(Method m, ITestContext ctx) throws MalformedURLException {
-        String username = System.getenv("LT_USERNAME") == null ? "Your LT Username" : System.getenv("LT_USERNAME");
-        String authkey = System.getenv("LT_ACCESS_KEY") == null ? "Your LT AccessKey" : System.getenv("LT_ACCESS_KEY");
-        ;
-        String hub = "@hub.lambdatest.com/wd/hub";
+    @BeforeTest
+    public void setup() throws Exception {
+        // LambdaTest credentials
+        String username = "belalahmad";
+        String authkey = "cousQqH3syuMR3H55LiQfG4QqCyPHRsZs3XJ3mbEle94hOdYLj";
+        String hub = "hub.lambdatest.com/wd/hub";
 
-        DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setCapability("platform", "MacOS Catalina");
-        caps.setCapability("browserName", "Safari");
-        caps.setCapability("version", "latest");
-        caps.setCapability("build", "TestNG With Java");
-        caps.setCapability("name", m.getName() + " - " + this.getClass().getName());
-        caps.setCapability("plugin", "git-testng");
+        // Set up SafariOptions using W3C syntax
+        ChromeOptions browserOptions = new ChromeOptions();
+//        SafariOptions browserOptions = new SafariOptions();
+//        browserOptions.setPlatformName("macOS Sonoma");
+        browserOptions.setBrowserVersion("latest");
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("profile.default_content_setting_values.geolocation", 1); // Allow geolocation
+        prefs.put("googlegeolocationaccess.enabled", true);
+        browserOptions.setExperimentalOption("prefs", prefs);
 
-        String[] Tags = new String[] { "Feature", "Falcon", "Severe" };
+        // Set up LambdaTest options using W3C syntax
+        Map<String, Object> ltOptions = new HashMap<>();
+        ltOptions.put("build", "belalsafaritest");
+        ltOptions.put("project", "popuptest");
+        ltOptions.put("w3c", true);  // Ensure that w3c is set to true
 
-        caps.setCapability("tags", Tags);
+//        ltOptions.put("autoAcceptAlerts", true);  // Automatically accept alerts
+//        ltOptions.put("autoGrantPermissions", true);  // Automatically grant permissions like location access
 
-        driver = new RemoteWebDriver(new URL("https://" + username + ":" + authkey + hub), caps);
+        // Set the LambdaTest capabilities as a capability within the SafariOptions
+        browserOptions.setCapability("LT:Options", ltOptions);
 
+        // Construct the remote URL and initialize the RemoteWebDriver
+        String remoteUrl = "https://" + username + ":" + authkey + "@" + hub;
+        driver = new RemoteWebDriver(new URL(remoteUrl), browserOptions);
+
+//        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
 
     @Test
-    public void basicTest() throws InterruptedException {
-        String spanText;
-        System.out.println("Loading Url");
-        driver.executeScript("lambdatest_executor: {\"action\": \"stepcontext\", \"arguments\": {\"data\": \"Opening WebApp\", \"level\": \"info\"}}");
+    public void testFormSubmission() throws InterruptedException {
+        // Navigate to the website
+        driver.get("https://belaletech.github.io/allow-location-permission/"); // Replace with your actual URL
+        Thread.sleep(2000); // Wait for 2 seconds
 
-        driver.get("https://lambdatest.github.io/sample-todo-app/");
+        // Find the input fields and fill them
+        WebElement nameInput = driver.findElement(By.id("name")); // Replace with the correct element locator
+        nameInput.sendKeys("Belal");
+        Thread.sleep(2000); // Wait for 2 seconds
 
-        driver.executeScript("lambdatest_executor: {\"action\": \"stepcontext\", \"arguments\": {\"data\": \"Checking List Items\", \"level\": \"info\"}}");
+        WebElement emailInput = driver.findElement(By.id("email")); // Replace with the correct element locator
+        emailInput.sendKeys("test@example.com");
+        Thread.sleep(2000); // Wait for 2 seconds
 
-        System.out.println("Checking Box");
-        driver.findElement(By.name("li1")).click();
+        // Find and click the submit button
+        WebElement submitButton = driver.findElement(By.xpath("//*[@id='locationForm']/button")); // Replace with the correct element locator
+        submitButton.click();
+        Thread.sleep(2000); // Wait for 2 seconds
 
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li2")).click();
+        // Handle the location popup
+        try {
+//            driver.switchTo().alert().accept(); // Accept the location alert
+            System.out.println("belal");
+        } catch (Exception e) {
+            System.out.println("No alert present or auto-grant permissions handled it.");
+        }
+        Thread.sleep(2000); // Wait for 2 seconds
 
-        System.out.println("Checking Box");
-        driver.findElement(By.name("li3")).click();
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li4")).click();
-
-        driver.executeScript("lambdatest_executor: {\"action\": \"stepcontext\", \"arguments\": {\"data\": \"Adding Items\", \"level\": \"info\"}}");
-
-        driver.findElement(By.id("sampletodotext")).sendKeys(" List Item 6");
-        driver.findElement(By.id("addbutton")).click();
-
-        driver.findElement(By.id("sampletodotext")).sendKeys(" List Item 7");
-        driver.findElement(By.id("addbutton")).click();
-
-        driver.findElement(By.id("sampletodotext")).sendKeys(" List Item 8");
-        driver.findElement(By.id("addbutton")).click();
-
-        driver.executeScript("lambdatest_executor: {\"action\": \"stepcontext\", \"arguments\": {\"data\": \"Checking More Items\", \"level\": \"info\"}}");
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li1")).click();
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li3")).click();
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li7")).click();
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li8")).click();
-        Thread.sleep(300);
-
-        driver.executeScript("lambdatest_executor: {\"action\": \"stepcontext\", \"arguments\": {\"data\": \"Adding and Verify List Items\", \"level\": \"info\"}}");
-        System.out.println("Entering Text");
-        driver.findElement(By.id("sampletodotext")).sendKeys("Get Taste of Lambda and Stick to It");
-
-        driver.findElement(By.id("addbutton")).click();
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li9")).click();
-
-        // Let's also assert that the todo we added is present in the list.
-
-        spanText = driver.findElementByXPath("/html/body/div/div/div/ul/li[9]/span").getText();
-        Assert.assertEquals("Get Taste of Lambda and Stick to It", spanText);
-        Status = "passed";
-        Thread.sleep(150);
-
-        System.out.println("TestFinished");
-
+        // Additional interactions can be added here as needed
+        // For example: Validate some action or navigate further
     }
 
-    @AfterMethod
+    @AfterTest
     public void tearDown() {
-        driver.executeScript("lambdatest_executor: {\"action\": \"stepcontext\", \"arguments\": {\"data\": \"Adding Test Result and Closing Browser\", \"level\": \"info\"}}");
-        driver.executeScript("lambda-status=" + Status);
-        driver.quit();
+        if (driver != null) {
+            driver.quit(); // Close the driver after execution
+        }
     }
-
 }

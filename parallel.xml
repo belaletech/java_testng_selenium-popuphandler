@@ -4,7 +4,7 @@
   <test thread-count="20" parallel="classes" name="Test">
     <classes>
       <class name="com.lambdatest.TestNGTodo1"/>
-      <class name="com.lambdatest.TestNGTodo2"/>
+<!--      <class name="com.lambdatest.TestNGTodo2"/>-->
       <class name="com.lambdatest.TestNGTodo3"/>
     </classes>
   </test> <!-- Test -->

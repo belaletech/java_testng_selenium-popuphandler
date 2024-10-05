@@ -4,6 +4,8 @@
   <test thread-count="1" parallel="classes" name="Test">
     <classes>
       <class name="com.lambdatest.TestNGTodoMobile"/>
+      <class name="com.lambdatest.AndroidChromePopupHandler"></class>
+      <class name="com.lambdatest.IOSPopupHandler"></class>
     </classes>
   </test> <!-- Test -->
 </suite> <!-- Suite -->
